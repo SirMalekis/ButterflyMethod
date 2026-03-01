@@ -13,6 +13,9 @@ namespace ButterFly
 {
     public partial class ButterflyMethod : Form
     {
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, int nFlags);
+
         public ButterflyMethod()
         {
             InitializeComponent();
@@ -35,27 +38,44 @@ namespace ButterFly
 
         Point lastpoint;
 
-        private void buttonSCR_Click(object sender, EventArgs e)
+        private void btnScreenshot_Click(object sender, EventArgs e)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.InitialDirectory = @"С://";
-            sfd.RestoreDirectory = true;
-            sfd.FileName = "Скриншот результата работы программы";
-            sfd.DefaultExt = "JPG";
-            sfd.Filter = "Image Files(*.BMP)|*.BMP|Image Files(*.JPG)|*.JPG|Image Files(*.GIF)|*.GIF|Image Files(*.PNG)|*.PNG|All files (*.*)|*.*";
-
-            if (sfd.ShowDialog() == DialogResult.OK)
+            try
             {
-                Rectangle bounds = this.Bounds;
-                using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
+                // Создаем пустую картинку размером с наше окно
+                Bitmap bmp = new Bitmap(this.Width, this.Height);
+
+                using (Graphics g = Graphics.FromImage(bmp))
                 {
-                    using (Graphics graph = Graphics.FromImage(bitmap))
-                    {
-                        graph.CopyFromScreen(new Point(bounds.Left, bounds.Top), Point.Empty, bounds.Size);
-                    }
-                    //bitmap.Save("C://screen.jpg", ImageFormat.Jpeg);
-                    bitmap.Save(sfd.FileName);
+                    // Получаем контекст графики и просим Windows "сфотографировать" окно по его хэндлу
+                    IntPtr hdc = g.GetHdc();
+                    PrintWindow(this.Handle, hdc, 0); // 0 означает захват всего окна вместе с рамками
+                    g.ReleaseHdc(hdc);
                 }
+
+                // Диалог сохранения файла
+                using (SaveFileDialog sfd = new SaveFileDialog())
+                {
+                    sfd.Filter = "PNG Image|*.png|JPEG Image|*.jpg|Bitmap Image|*.bmp";
+                    sfd.Title = "Сохранить скриншот метода Бабочки";
+                    sfd.FileName = "Butterfly_Screenshot.png";
+
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        // Определяем формат в зависимости от расширения
+                        System.Drawing.Imaging.ImageFormat format = System.Drawing.Imaging.ImageFormat.Png;
+                        if (sfd.FileName.EndsWith("jpg")) format = System.Drawing.Imaging.ImageFormat.Jpeg;
+                        else if (sfd.FileName.EndsWith("bmp")) format = System.Drawing.Imaging.ImageFormat.Bmp;
+
+                        // Сохраняем
+                        bmp.Save(sfd.FileName, format);
+                        MessageBox.Show("Скриншот успешно сохранен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении скриншота: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -64,6 +84,21 @@ namespace ButterFly
             try
             {
                 int chisl1, chisl2, znam1, znam2, chisl, znam;
+
+                if (string.IsNullOrWhiteSpace(Chisl1.Text) || string.IsNullOrWhiteSpace(Znam1.Text) ||
+                    string.IsNullOrWhiteSpace(Chisl2.Text) || string.IsNullOrWhiteSpace(Znam2.Text))
+                {
+                    MessageBox.Show("Пожалуйста, заполните все поля (числители и знаменатели).", 
+                        "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (Znam1.Text == "0" || Znam2.Text == "0")
+                {
+                    MessageBox.Show("Знаменатель не может быть равен нулю!", "Ошибка математики",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
                 chisl1 = Convert.ToInt32(Chisl1.Text);
                 znam1 = Convert.ToInt32(Znam1.Text);
@@ -95,6 +130,21 @@ namespace ButterFly
             try
             {
                 int chisl1, chisl2, znam1, znam2, chisl, znam;
+
+                if (string.IsNullOrWhiteSpace(Chisl1.Text) || string.IsNullOrWhiteSpace(Znam1.Text) || 
+                    string.IsNullOrWhiteSpace(Chisl2.Text) || string.IsNullOrWhiteSpace(Znam2.Text))
+                {
+                    MessageBox.Show("Пожалуйста, заполните все поля (числители и знаменатели).",
+                        "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (Znam1.Text == "0" || Znam2.Text == "0")
+                {
+                    MessageBox.Show("Знаменатель не может быть равен нулю!", "Ошибка математики",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
                 chisl1 = Convert.ToInt32(Chisl1.Text);
                 znam1 = Convert.ToInt32(Znam1.Text);

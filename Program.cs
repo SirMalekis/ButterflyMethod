@@ -17,9 +17,11 @@ namespace ButterFly
         [STAThread]
         static void Main()
         {
-            string currentDirectory = Path.GetDirectoryName(Application.ExecutablePath);
-            if (!File.Exists($"{currentDirectory}\\databasefile.db"))
-                new DB("Data Source = databasefile.db;Version=3").InitializeDatabase();
+            string dbPath = Path.Combine(Application.StartupPath, "databasefile.db");
+            if (!File.Exists(dbPath))
+            {
+                new DB($"Data Source={dbPath};Version=3;").InitializeDatabase();
+            }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

@@ -151,8 +151,17 @@ namespace ButterFly
         {
             string loginUser = loginField.Text;
 
-            SQLiteConnection connection = new SQLiteConnection("Data Source=databasefile.db");
-            connection.Open();
+            string dbPath = System.IO.Path.Combine(Application.StartupPath, "databasefile.db");
+            SQLiteConnection connection = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+            try
+            {
+                connection.Open();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка подключения к БД: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
 
             SQLiteCommand command = connection.CreateCommand();
             command.Connection = connection;
@@ -242,9 +251,17 @@ namespace ButterFly
 
 
             if (com.ExecuteNonQuery() == 1)
-                MessageBox.Show("Аккаунт успешно зарегестрирован");
+            {
+                MessageBox.Show("Аккаунт успешно зарегистрирован!");
+
+                this.Hide();
+                Auth auth = new Auth();
+                auth.Show();
+            }
             else
+            {
                 MessageBox.Show("Ошибка регистрации аккаунта");
+            }
         }
         private void regLabel_Click(object sender, EventArgs e)
         {

@@ -14,7 +14,6 @@ namespace ButterFly
 {
     public partial class Auth : Form
     {
-        
         public Auth()
         {
             InitializeComponent();
@@ -80,8 +79,17 @@ namespace ButterFly
             //string passwordUser = passField.Text;
             string passwordUser = md5.hashPassword(passField.Text);
 
-            SQLiteConnection connection = new SQLiteConnection("Data Source=databasefile.db");
-            connection.Open();
+            string dbPath = System.IO.Path.Combine(Application.StartupPath, "databasefile.db");
+            SQLiteConnection connection = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+            try
+            {
+                connection.Open();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка подключения к БД: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             SQLiteCommand com = connection.CreateCommand();
             com.Connection = connection;

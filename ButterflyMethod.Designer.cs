@@ -205,7 +205,7 @@
             this.buttonSCR.TabIndex = 25;
             this.buttonSCR.Text = "Скриншот";
             this.buttonSCR.UseVisualStyleBackColor = true;
-            this.buttonSCR.Click += new System.EventHandler(this.buttonSCR_Click);
+            this.buttonSCR.Click += new System.EventHandler(this.btnScreenshot_Click);
             // 
             // Chisl
             // 
